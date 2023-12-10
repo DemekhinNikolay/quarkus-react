@@ -7,22 +7,25 @@ import jakarta.ws.rs.ext.Provider;
 import org.hibernate.HibernateException;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.StaleObjectStateException;
+import org.hibernate.exception.ConstraintViolationException;
 
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Optional;
 
 @Provider
 public class RestExceptionHandler implements ExceptionMapper<HibernateException> {
 
-    private static final String PG_UNIQUE_VIOLATION_ERROR = "23505";
+    private static final String SQL_UNIQUE_VIOLATION_ERROR = "23505";
 
     @Override
     public Response toResponse(HibernateException exception) {
         if (hasExceptionInChain(exception, ObjectNotFoundException.class)) {
             return Response.status(Response.Status.NOT_FOUND).entity(exception.getMessage()).build();
         }
-        if (hasExceptionInChain(exception, StaleObjectStateException.class)
-                || hasPostgresErrorCode(exception, PG_UNIQUE_VIOLATION_ERROR)) {
+        if (hasExceptionInChain(exception, ConstraintViolationException.class)
+                || hasSQLErrorCode(exception, SQL_UNIQUE_VIOLATION_ERROR)
+                || hasExceptionInChain(exception, StaleObjectStateException.class)) {
             return Response.status(Response.Status.CONFLICT).build();
         }
         return Response
@@ -36,9 +39,9 @@ public class RestExceptionHandler implements ExceptionMapper<HibernateException>
     }
 
 
-    private static boolean hasPostgresErrorCode(Throwable throwable, String code) {
-        return getExceptionInChain(throwable, PgException.class)
-                .filter(ex -> Objects.equals(ex.getCode(), code))
+    private static boolean hasSQLErrorCode(Throwable throwable, String code) {
+        return getExceptionInChain(throwable, SQLException.class)
+                .filter(ex -> Objects.equals(ex.getSQLState(), code))
                 .isPresent();
     }
 

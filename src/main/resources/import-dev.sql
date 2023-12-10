@@ -10,6 +10,7 @@ VALUES (1, 'user', '$2a$10$7b.9iLgXFVh.r1u9HEbMv.EDL3JcJgldsWHUg4etSUh4wCNGuExye
     ON CONFLICT DO NOTHING;
 INSERT INTO "user_roles" ("id", "role") VALUES (1, 'user')
     ON CONFLICT DO NOTHING;
+alter sequence users_seq restart with 2;
 INSERT INTO "projects" ("id", "name", "user_id", "created", "version")
 VALUES (0, 'Work', 1, NOW(), 0)
     ON CONFLICT DO NOTHING;
