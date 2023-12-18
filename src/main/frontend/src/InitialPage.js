@@ -5,7 +5,7 @@ import {Layout} from './layout';
 export const InitialPage = () => (
     <Layout>
         <Typography variant='h4' >
-            Greetings Professor Falken!
+            Greetings Nikolay!
         </Typography>
     </Layout>
 );
